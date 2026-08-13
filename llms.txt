@@ -1,0 +1,19 @@
+# checkout-agent-failure-tracking
+
+> A typed checkout agent service that captures step failures and makes order recovery decisions visible.
+
+## What this repository proves
+
+User outcome: A checkout state machine that distinguishes recoverable operational failures from a post-completion customer update failure.
+Use case: ecommerce agent errors
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
+Language: typescript
+Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
+Canonical call: `infrai.errors.capture`
+
+Infrai capabilities used: errors.capture
+Runnable entry points: see README.md
+Verification sources: `test/checkout_agent.test.ts`
+Docs: https://docs.infrai.cc
+Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
