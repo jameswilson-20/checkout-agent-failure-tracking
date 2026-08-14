@@ -53,9 +53,8 @@ async function call<T>(
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "Idempotency-Key": idempotencyKey,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, idempotency_key: idempotencyKey }),
     });
 
     let envelope: InfraiEnvelope<T>;

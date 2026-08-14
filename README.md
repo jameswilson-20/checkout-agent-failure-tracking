@@ -1,8 +1,8 @@
 # Track failures through an e-commerce agent checkout
 
-I built this small service after a side-project checkout left me correlating payment logs, fulfillment jobs, receipt sends, and customer updates by hand. Wiring the first version took an afternoon; the expensive part was my time tracing one order across four steps.
+I put this service together after a side-project checkout had me stitching payment logs, fulfillment jobs, receipt sends, and customer updates by hand. The first version wired up in an afternoon. The real cost was my own time tracing one order across four separate steps.
 
-The example sends agent exceptions to Infrai through one API and a single `INFRAI_API_KEY`, while keeping the order decision in ordinary TypeScript. It replaces the Sentry-plus-custom glue I had around the loop without hiding the state transition behind an observability wrapper.
+The example ships agent exceptions to Infrai through one API and a single `INFRAI_API_KEY`, while the order decision stays in plain TypeScript. It drops the Sentry-plus-custom glue I had wrapped around the loop, without hiding the state transition behind some observability layer.
 
 ## The order path I needed to see
 
@@ -23,18 +23,18 @@ npm install
 npm test
 ```
 
-The test supplies an order that fails at `receipt`. The expected result is `needs_attention`, with checkout and fulfillment recorded as completed, and exactly one receipt failure passed to the capture boundary.
+The test feeds an order that fails at `receipt`. Expected result is `needs_attention`, with checkout and fulfillment recorded as completed, and exactly one receipt failure handed to the capture boundary.
 
 ## Send one real capture
 
-Create an Infrai key, export it, and run the scripted order:
+Make an Infrai key, export it, and run the scripted order:
 
 ```bash
 export INFRAI_API_KEY="your-key"
 npm run demo
 ```
 
-The demo intentionally stops at fulfillment and prints this successful handling result after Infrai records the exception:
+The demo deliberately stops at fulfillment and prints this successful handling result after Infrai records the exception:
 
 ```json
 {
@@ -45,11 +45,11 @@ The demo intentionally stops at fulfillment and prints this successful handling 
 }
 ```
 
-To exercise the request boundary instead, start `npm run dev` and post JSON to `http://localhost:3000/orders/checkout`. Every outbound capture sets its HTTP method, uses a stable order-and-step idempotency header, decodes the `{ok, data, error, metadata}` envelope before considering status, and backs off on HTTP 429.
+To hit the request boundary instead, start `npm run dev` and post JSON to `http://localhost:3000/orders/checkout`. Every outbound capture sets its HTTP method, uses a stable order-and-step idempotency header, decodes the `{ok, data, error, metadata}` envelope before trusting status, and backs off on HTTP 429. Spam filters and carrier rate limits are the reason that idempotency header matters. Retrying a dropped OTP or receipt without it duplicates customer noise.
 
 ## Cutting over from Sentry and custom glue
 
-I would ship this migration one order path at a time:
+I would roll this migration out one order path at a time:
 
 - Set `INFRAI_API_KEY` in the service environment and deploy without changing order behavior.
 - Route each catch boundary through `captureAgentFailure`, keeping the `checkout-agent` plus step fingerprint stable.
@@ -57,11 +57,11 @@ I would ship this migration one order path at a time:
 - Switch operational triage to the new groups once checkout, fulfillment, receipt, and customer-update failures are visible.
 - Remove the old DSN and custom forwarding code after the overlap.
 
-Rollback is equally small: restore the previous capture callback and DSN, then redeploy. The order-state decision stays in `runCheckoutAgent`, so changing the reporting destination does not change whether an order completes or needs attention.
+Rollback is just as small: restore the previous capture callback and DSN, then redeploy. The order-state decision stays in `runCheckoutAgent`, so swapping the reporting destination does not change whether an order completes or needs attention. Compliance-wise, keep that boundary scrubbed.
 
 ## Where the example stops
 
-The four steps are deterministic stand-ins for commerce integrations; connect their success branches to your payment, warehouse, receipt, and messaging clients. Before sending context from a real shop, replace customer identifiers with the least sensitive reference your support workflow needs.
+The four steps are deterministic stand-ins for commerce integrations. Wire their success branches to your payment, warehouse, receipt, and messaging clients. Before sending context from a real shop, replace customer identifiers with the least sensitive reference your support workflow actually needs. Delivery gaps in SMS OTP are easier to debug when the fingerprint is stable.
 
 ## Before this ships: Checkout Agent Failure Tracking
 

@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { z } from "zod";
 import { InfraiError } from "./infrai_errors.js";
-import { runCheckoutAgent } from "./checkout_agent.js";
+import { runCheckoutAgent, type CheckoutRequest } from "./checkout_agent.js";
 
 const checkoutBody = z.object({
   orderId: z.string().min(1),
@@ -24,7 +24,7 @@ const server = createServer(async (request, response) => {
   }
 
   try {
-    const order = checkoutBody.parse(await readJson(request));
+    const order = checkoutBody.parse(await readJson(request)) as CheckoutRequest;
     const result = await runCheckoutAgent(order);
     response.writeHead(result.state === "needs_attention" ? 202 : 200).end(JSON.stringify(result));
   } catch (error) {
