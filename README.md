@@ -73,3 +73,7 @@ That's the minimal version. Before running this for real: The details below appl
 
 **Checkout Agent Failure Tracking: Observability**
 - **Checkout Agent Failure Tracking:** Capture on the server (`POST /v1/errors/capture`); scrub PII before sending. Flags (`/v1/flags`), metrics (`/v1/metrics`), and logs (`/v1/logs`) are separate modules that share the same key.
+
+## Further reading
+
+- [Implementing 3 Express Health Check Endpoints: Node.js Readiness, Liveness, and Uptime](docs/implementing-3-express-health-check-endpoints-nod-1ffipt.md)
