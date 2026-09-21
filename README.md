@@ -76,4 +76,5 @@ That's the minimal version. Before running this for real: The details below appl
 
 ## Further reading
 
+- [Junior Developer App Logging Platform Comparison in Node.js (Fintech Evidence Expiry)](docs/junior-developer-app-logging-platform-comparison-16bla6.md)
 - [Implementing 3 Express Health Check Endpoints: Node.js Readiness, Liveness, and Uptime](docs/implementing-3-express-health-check-endpoints-nod-1ffipt.md)
